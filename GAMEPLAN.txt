@@ -1,0 +1,98 @@
+MACHINE GAZE - DEVELOPMENT GAMEPLAN
+=====================================
+
+PROJECT OVERVIEW
+-----------------
+Research/art project for computer vision analysis of pre-recorded video clips (15-30 seconds typically).
+Goal: Create extensible system for object detection + emotion analysis with annotated video output.
+Processing: Offline batch processing (overnight for hours of footage acceptable).
+Platform: Local M1 Mac, no real-time constraints.
+
+IMPLEMENTATION PLAN
+-------------------
+
+PHASE 1: CORE ARCHITECTURE ⭐ (START HERE)
+------------------------------------------
+□ Set up modular project structure with extensible classifier framework
+□ Implement YOLO-World as primary object detector (easiest for local setup)
+□ Create basic video I/O and overlay rendering system
+□ Build ClassifierRegistry pattern for easy extension
+
+Target Objects (Initial):
+- car, pickup truck, box truck, semi truck
+- tree
+- street light, lamppost
+- walker, rollator, mobility walker, walking frame
+- stroller, wheelchair
+- traffic light, stoplight
+
+PHASE 2: EMOTION DETECTION
+--------------------------
+□ Add face detection pipeline (RetinaFace or MTCNN)
+□ Implement emotion classification (7 emotions: happy, sad, angry, fear, surprise, disgust, neutral)
+□ Integrate face detection with person bounding boxes
+
+PHASE 3: TRACKING & SMOOTHING
+-----------------------------
+□ Integrate ByteTrack for temporal consistency
+□ Add frame-to-frame smoothing to reduce flickering
+□ Implement temporal voting (majority vote over sliding window)
+□ Add track ID visualization with color coding
+
+PHASE 4: POLISH & USABILITY
+---------------------------
+□ Create CLI interface for batch processing
+□ Build configuration system for easy classifier addition/modification
+□ Add support for multiple output formats
+□ Documentation and usage examples
+
+TECHNICAL DECISIONS
+-------------------
+
+Primary Detector: YOLO-World
+- Rationale: Ultralytics ecosystem, mature documentation, excellent local setup
+- Good speed/accuracy balance for offline processing
+- Easy extension with custom classes
+
+Architecture: Modular ClassifierRegistry
+- Easy to add new classifiers (gesture recognition, activity detection, etc.)
+- Configuration-driven (thresholds, enabled classifiers, styling)
+- Clean separation between detection, tracking, and rendering
+
+Output: Annotated video files with overlays
+- Bounding boxes with labels and confidence scores
+- Emotion labels on detected faces
+- Track IDs and motion trails
+- Configurable styling (colors, fonts, etc.)
+
+FUTURE EXTENSIBILITY
+--------------------
+Framework designed to easily add:
+- New emotion models
+- Gesture recognition
+- Custom object types
+- Activity recognition
+- Additional computer vision tasks
+
+DEFERRED FEATURES
+-----------------
+- Street/road segmentation (may add later)
+- Real-time processing (not needed for current use case)
+- Cloud deployment (local M1 Mac sufficient)
+
+DEVELOPMENT ENVIRONMENT
+-----------------------
+- Python 3.9+
+- PyTorch with MPS support for M1 Mac
+- OpenCV for video processing
+- Ultralytics for YOLO-World
+- Face detection and emotion classification libraries
+- ByteTrack for object tracking
+
+NEXT STEPS
+----------
+1. Set up project structure and dependencies
+2. Implement core video processing pipeline
+3. Add YOLO-World object detection
+4. Test with sample video clips
+5. Iterate based on results before adding complexity

@@ -1,0 +1,48 @@
+# Configuration for overlay-only mode with white background
+# Inherits from default config but overrides background color
+
+# Video processing settings
+video_processor:
+  # Rendering appearance
+  font_scale: 0.7               # Slightly larger text for better visibility
+  font_thickness: 2
+  bbox_thickness: 3             # Thicker boxes for better visibility
+  text_color: [0, 0, 0]         # Black text for contrast on white
+  bbox_color: [255, 0, 0]       # Blue boxes for better contrast
+  
+  # Overlay-only mode settings  
+  overlay_only: true            # Enable overlay-only by default
+  background_color: [255, 255, 255]  # White background (BGR)
+
+# Use same classifier config as default
+classifiers:
+  yolo_world:
+    enabled: true
+    model_size: "s"
+    confidence_threshold: 0.3
+    device: "auto"
+    input_size: 640
+    classes:
+      - "car"
+      - "pickup truck"
+      - "box truck" 
+      - "semi truck"
+      - "truck"
+      - "tree"
+      - "street light"
+      - "lamppost"
+      - "traffic light"
+      - "stoplight"
+      - "walker"
+      - "rollator"
+      - "mobility walker"
+      - "walking frame"
+      - "stroller"
+      - "wheelchair"
+      - "person"
+      - "pedestrian"
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

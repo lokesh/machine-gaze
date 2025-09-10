@@ -1,0 +1,79 @@
+# Default configuration for Machine Gaze
+# This file defines the standard setup for object detection
+
+# Global settings
+output:
+  fps: null  # Use input video FPS
+  codec: "mp4v"
+  quality: 0.9
+
+# Video processing settings
+video_processor:
+  # Rendering appearance
+  font_scale: 0.6
+  font_thickness: 2
+  bbox_thickness: 2
+  text_color: [255, 255, 255]  # White
+  bbox_color: [0, 255, 0]      # Green (default, overridden per class)
+  
+  # Overlay-only mode settings
+  overlay_only: false          # Set to true to show only detections without original video
+  background_color: [0, 0, 0]  # Background color for overlay-only mode (BGR: Black)
+
+# Classifier configurations
+classifiers:
+  # YOLO-World object detector
+  yolo_world:
+    enabled: true
+    model_size: "s"  # Options: s, m, l, x (larger = more accurate but slower)
+    confidence_threshold: 0.3
+    device: "auto"  # auto, cpu, mps, cuda
+    input_size: 640
+    
+    # Target objects from GAMEPLAN.txt
+    classes:
+      # Vehicles
+      - "car"
+      - "pickup truck"
+      - "box truck" 
+      - "semi truck"
+      - "truck"
+      
+      # Infrastructure
+      - "tree"
+      - "street light"
+      - "lamppost"
+      - "traffic light"
+      - "stoplight"
+      
+      # Mobility devices
+      - "walker"
+      - "rollator"
+      - "mobility walker"
+      - "walking frame"
+      - "stroller"
+      - "wheelchair"
+      
+      # People for context
+      - "person"
+      - "pedestrian"
+      
+      # Example: Additional objects you might want
+      # Uncomment and modify as needed:
+      # - "bicycle"
+      # - "motorcycle"
+      # - "bus"
+      # - "stop sign"
+      # - "fire hydrant"
+      # - "bench"
+      # - "dog"
+      # - "cat"
+      # - "bird"
+      # - "backpack"
+      # - "umbrella"
+      # - "handbag"
+
+# Logging configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

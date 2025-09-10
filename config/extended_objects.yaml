@@ -1,0 +1,80 @@
+# Extended object detection configuration
+# Includes more object types for comprehensive detection
+
+video_processor:
+  font_scale: 0.6
+  font_thickness: 2
+  bbox_thickness: 2
+  text_color: [255, 255, 255]
+  bbox_color: [0, 255, 0]
+
+classifiers:
+  yolo_world:
+    enabled: true
+    model_size: "s"
+    confidence_threshold: 0.25  # Lower threshold to catch more objects
+    device: "auto"
+    input_size: 640
+    
+    classes:
+      # Original Machine Gaze objects
+      - "car"
+      - "pickup truck"
+      - "box truck"
+      - "semi truck"
+      - "truck"
+      - "tree"
+      - "street light"
+      - "lamppost"
+      - "traffic light"
+      - "stoplight"
+      - "walker"
+      - "rollator"
+      - "mobility walker"
+      - "walking frame"
+      - "stroller"
+      - "wheelchair"
+      - "person"
+      - "pedestrian"
+      
+      # Additional vehicles & transportation
+      - "bicycle"
+      - "motorcycle"
+      - "bus"
+      - "van"
+      - "scooter"
+      
+      # Street furniture & infrastructure
+      - "stop sign"
+      - "fire hydrant"
+      - "bench"
+      - "mailbox"
+      - "parking meter"
+      - "pole"
+      - "sign"
+      
+      # Animals
+      - "dog"
+      - "cat"
+      - "bird"
+      - "horse"
+      
+      # Personal items
+      - "backpack"
+      - "handbag"
+      - "suitcase"
+      - "umbrella"
+      - "bottle"
+      - "cup"
+      
+      # Buildings & structures
+      - "building"
+      - "house"
+      - "fence"
+      - "wall"
+      - "door"
+      - "window"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
