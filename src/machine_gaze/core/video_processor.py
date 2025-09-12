@@ -12,6 +12,9 @@ import numpy as np
 from pathlib import Path
 from typing import Optional, List, Callable, Dict, Any
 from .classifier_registry import ClassifierRegistry, Detection
+from ..utils.detection_utils import associate_faces_with_people, filter_overlapping_detections
+from ..tracking import ByteTracker, TrackSmoother
+from ..tracking.track_smoother import SmoothedTrackState
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +56,42 @@ class VideoProcessor:
         # Overlay-only mode settings
         self.overlay_only = self.config.get('overlay_only', False)
         self.background_color = self.config.get('background_color', (0, 0, 0))  # Black background
+        
+        # Detection enhancement settings
+        self.enable_face_person_association = self.config.get('face_person_association', True)
+        self.enable_nms = self.config.get('non_max_suppression', True)
+        self.nms_threshold = self.config.get('nms_threshold', 0.5)
+        
+        # Tracking settings
+        tracking_config = self.config.get('tracking', {})
+        self.enable_tracking = tracking_config.get('enabled', False)
+        self.show_track_ids = tracking_config.get('show_track_ids', True)
+        self.show_trajectories = tracking_config.get('show_trajectories', False)
+        self.trajectory_length = tracking_config.get('trajectory_length', 10)
+        
+        # Initialize tracking components
+        if self.enable_tracking:
+            self.tracker = ByteTracker(
+                high_thresh=tracking_config.get('high_thresh', 0.6),
+                low_thresh=tracking_config.get('low_thresh', 0.1),
+                new_track_thresh=tracking_config.get('new_track_thresh', 0.7),
+                track_buffer=tracking_config.get('track_buffer', 30),
+                match_thresh=tracking_config.get('match_thresh', 0.8)
+            )
+            
+            self.track_smoother = TrackSmoother(
+                temporal_window=tracking_config.get('temporal_window', 5),
+                bbox_smoothing=tracking_config.get('bbox_smoothing', True),
+                confidence_smoothing=tracking_config.get('confidence_smoothing', True),
+                class_voting=tracking_config.get('class_voting', True)
+            )
+            
+            # Track visualization
+            self.track_colors = {}  # track_id -> color mapping
+            self.track_trajectories = {}  # track_id -> list of center points
+        else:
+            self.tracker = None
+            self.track_smoother = None
         
         # Progress callback
         self.progress_callback: Optional[Callable[[int, int], None]] = None
@@ -121,8 +160,24 @@ class VideoProcessor:
                 # Process frame through classifiers
                 detections = self.registry.process_frame(frame)
                 
+                # Enhance detections with post-processing
+                enhanced_detections = self._enhance_detections(detections)
+                
+                # Apply tracking if enabled
+                final_detections = enhanced_detections
+                if self.enable_tracking and self.tracker is not None:
+                    track_states = self.tracker.update(enhanced_detections)
+                    
+                    if self.track_smoother is not None:
+                        smoothed_tracks = self.track_smoother.smooth_tracks(track_states)
+                        # Convert smoothed tracks back to detections
+                        final_detections = self._tracks_to_detections(smoothed_tracks)
+                    else:
+                        # Convert track states back to detections
+                        final_detections = self._tracks_to_detections(track_states)
+                
                 # Render detections onto frame
-                annotated_frame = self.render_detections(frame, detections)
+                annotated_frame = self.render_detections(frame, final_detections)
                 
                 # Write annotated frame
                 out.write(annotated_frame)
@@ -182,15 +237,23 @@ class VideoProcessor:
         """
         x1, y1, x2, y2 = detection.bbox
         
-        # Choose color based on classifier or use default
-        color = self._get_color_for_class(detection.class_name)
+        # Choose color - use track color if tracking is enabled and track_id exists
+        if self.enable_tracking and detection.track_id is not None:
+            color = self._get_track_color(detection.track_id)
+            
+            # Update trajectory
+            if self.show_trajectories:
+                self._update_track_trajectory(detection.track_id, detection.bbox)
+                self._draw_track_trajectory(frame, detection.track_id, color)
+        else:
+            color = self._get_color_for_class(detection.class_name)
         
         # Draw bounding box
         cv2.rectangle(frame, (x1, y1), (x2, y2), color, self.bbox_thickness)
         
         # Prepare label text
         label = f"{detection.class_name}: {detection.confidence:.2f}"
-        if detection.track_id is not None:
+        if detection.track_id is not None and self.show_track_ids:
             label += f" (ID: {detection.track_id})"
         
         # Calculate text size and position
@@ -245,6 +308,30 @@ class VideoProcessor:
         # Return as BGR for OpenCV
         return (b, g, r)
     
+    def _enhance_detections(self, detections: List[Detection]) -> List[Detection]:
+        """
+        Enhance detection results with post-processing.
+        
+        Args:
+            detections: Raw detections from classifiers
+            
+        Returns:
+            Enhanced detections with face-person associations and NMS applied
+        """
+        enhanced = detections
+        
+        # Associate faces with people if enabled
+        if self.enable_face_person_association:
+            enhanced = associate_faces_with_people(enhanced)
+            logger.debug(f"Face-person association: {len(detections)} -> {len(enhanced)} detections")
+        
+        # Apply Non-Maximum Suppression if enabled
+        if self.enable_nms:
+            enhanced = filter_overlapping_detections(enhanced, self.nms_threshold)
+            logger.debug(f"NMS applied: reduced overlapping detections")
+        
+        return enhanced
+    
     def process_single_frame(self, frame: np.ndarray) -> tuple[np.ndarray, List[Detection]]:
         """
         Process a single frame and return annotated frame and detections.
@@ -258,5 +345,114 @@ class VideoProcessor:
             Tuple of (annotated_frame, detections)
         """
         detections = self.registry.process_frame(frame)
-        annotated_frame = self.render_detections(frame, detections)
-        return annotated_frame, detections
+        enhanced_detections = self._enhance_detections(detections)
+        
+        # Apply tracking if enabled
+        final_detections = enhanced_detections
+        if self.enable_tracking and self.tracker is not None:
+            track_states = self.tracker.update(enhanced_detections)
+            
+            if self.track_smoother is not None:
+                smoothed_tracks = self.track_smoother.smooth_tracks(track_states)
+                # Convert smoothed tracks back to detections
+                final_detections = self._tracks_to_detections(smoothed_tracks)
+            else:
+                # Convert track states back to detections
+                final_detections = self._tracks_to_detections(track_states)
+        
+        annotated_frame = self.render_detections(frame, final_detections)
+        return annotated_frame, final_detections
+    
+    def _tracks_to_detections(self, track_states) -> List[Detection]:
+        """
+        Convert track states back to Detection objects.
+        
+        Args:
+            track_states: List of TrackState or SmoothedTrackState objects
+            
+        Returns:
+            List of Detection objects with track IDs
+        """
+        detections = []
+        for track in track_states:
+            detection = Detection(
+                bbox=track.bbox,
+                class_name=track.class_name,
+                confidence=track.confidence,
+                track_id=track.track_id,
+                metadata=track.metadata
+            )
+            detections.append(detection)
+        return detections
+    
+    def _get_track_color(self, track_id: int) -> tuple:
+        """
+        Get consistent color for a track ID.
+        
+        Args:
+            track_id: Track identifier
+            
+        Returns:
+            BGR color tuple
+        """
+        if track_id not in self.track_colors:
+            # Generate deterministic color from track ID
+            np.random.seed(track_id)
+            color = tuple(np.random.randint(50, 255, 3).tolist())
+            self.track_colors[track_id] = color
+        
+        return self.track_colors[track_id]
+    
+    def _update_track_trajectory(self, track_id: int, bbox: tuple):
+        """
+        Update trajectory for a track.
+        
+        Args:
+            track_id: Track identifier
+            bbox: Bounding box (x1, y1, x2, y2)
+        """
+        center_x = int((bbox[0] + bbox[2]) / 2)
+        center_y = int((bbox[1] + bbox[3]) / 2)
+        
+        if track_id not in self.track_trajectories:
+            self.track_trajectories[track_id] = []
+        
+        self.track_trajectories[track_id].append((center_x, center_y))
+        
+        # Keep only recent trajectory points
+        if len(self.track_trajectories[track_id]) > self.trajectory_length:
+            self.track_trajectories[track_id].pop(0)
+    
+    def _draw_track_trajectory(self, frame: np.ndarray, track_id: int, color: tuple):
+        """
+        Draw trajectory for a track.
+        
+        Args:
+            frame: Frame to draw on
+            track_id: Track identifier
+            color: Color for trajectory
+        """
+        if track_id not in self.track_trajectories:
+            return
+        
+        trajectory = self.track_trajectories[track_id]
+        if len(trajectory) < 2:
+            return
+        
+        # Draw trajectory lines
+        for i in range(1, len(trajectory)):
+            pt1 = trajectory[i-1]
+            pt2 = trajectory[i]
+            
+            # Fade older points
+            alpha = i / len(trajectory)
+            faded_color = tuple(int(c * alpha) for c in color)
+            
+            cv2.line(frame, pt1, pt2, faded_color, 2)
+        
+        # Draw trajectory points
+        for i, point in enumerate(trajectory):
+            alpha = (i + 1) / len(trajectory)
+            radius = int(3 * alpha)
+            faded_color = tuple(int(c * alpha) for c in color)
+            cv2.circle(frame, point, radius, faded_color, -1)

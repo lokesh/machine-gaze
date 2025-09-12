@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MACHINE GAZE - Analysis Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background-color: #f0f0f0; padding: 20px; }
+        .stats { display: flex; gap: 20px; margin: 20px 0; }
+        .stat-box { background-color: #e8f4f8; padding: 15px; border-radius: 5px; }
+        .class-table { border-collapse: collapse; width: 100%; }
+        .class-table th, .class-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .class-table th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 MACHINE GAZE - Analysis Report</h1>
+        <p>Generated at: 2025-09-09 23:00:21</p>
+    </div>
+    
+    <div class="stats">
+        <div class="stat-box">
+            <h3>📊 Overall Statistics</h3>
+            <p><strong>Total Frames:</strong> 205</p>
+            <p><strong>Total Detections:</strong> 506</p>
+            <p><strong>Average Detections/Frame:</strong> 2.47</p>
+            <p><strong>Session Duration:</strong> 19.5 seconds</p>
+        </div>
+        
+        <div class="stat-box">
+            <h3>🎯 Detection Classes</h3>
+            <p><strong>Unique Classes:</strong> 4</p>
+            <p><strong>Most Common:</strong> car</p>
+            <p><strong>Average Confidence:</strong> 0.755</p>
+        </div>
+    </div>
+    
+    <h2>📋 Class Detection Summary</h2>
+    <table class="class-table">
+        <tr>
+            <th>Class Name</th>
+            <th>Total Detections</th>
+            <th>Average Confidence</th>
+            <th>Frames Present</th>
+        </tr>
+
+        <tr>
+            <td>person</td>
+            <td>154</td>
+            <td>0.867</td>
+            <td>154</td>
+        </tr>
+
+        <tr>
+            <td>car</td>
+            <td>234</td>
+            <td>0.645</td>
+            <td>142</td>
+        </tr>
+
+        <tr>
+            <td>bicycle</td>
+            <td>109</td>
+            <td>0.820</td>
+            <td>109</td>
+        </tr>
+
+        <tr>
+            <td>person_disgust</td>
+            <td>9</td>
+            <td>0.916</td>
+            <td>9</td>
+        </tr>
+
+    </table>
+</body>
+</html>

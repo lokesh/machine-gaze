@@ -73,6 +73,16 @@ classifiers:
       # - "umbrella"
       # - "handbag"
 
+  # Face emotion detector
+  face_emotion:
+    enabled: false  # Disabled by default - enable when needed
+    face_confidence: 0.5      # Minimum confidence for face detection
+    emotion_confidence: 0.3   # Minimum confidence for emotion prediction
+    face_padding: 0.2         # Padding around detected faces (20%)
+    min_face_size: 30         # Minimum face size in pixels
+    confidence_threshold: 0.3 # Overall detection threshold
+    model_path: null          # Path to custom emotion model (null = use built-in)
+
 # Logging configuration
 logging:
   level: "INFO"  # DEBUG, INFO, WARNING, ERROR

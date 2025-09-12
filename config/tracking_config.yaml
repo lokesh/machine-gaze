@@ -1,0 +1,67 @@
+# MACHINE GAZE - Phase 3: Tracking Configuration
+# Configuration for object tracking and temporal smoothing
+
+video_processor:
+  # Basic rendering settings
+  overlay_only: true
+  background_color: [0, 0, 0]  # Black background for overlay mode
+  
+  # Detection enhancement
+  face_person_association: true
+  non_max_suppression: true
+  nms_threshold: 0.5
+  
+  # Tracking system settings
+  tracking:
+    enabled: true                    # Enable ByteTracker for temporal consistency
+    
+    # ByteTracker parameters
+    high_thresh: 0.6                 # High confidence threshold for tracking
+    low_thresh: 0.1                  # Low confidence threshold for potential matches
+    new_track_thresh: 0.7            # Threshold for creating new tracks
+    track_buffer: 30                 # Number of frames to keep lost tracks
+    match_thresh: 0.8                # IoU threshold for matching detections to tracks
+    
+    # Track visualization
+    show_track_ids: true             # Show track IDs in labels
+    show_trajectories: true          # Show motion trails
+    trajectory_length: 15            # Number of points in trajectory trail
+    
+    # Track smoother parameters
+    temporal_window: 5               # Size of temporal window for voting
+    bbox_smoothing: true             # Enable Kalman smoothing for bounding boxes
+    confidence_smoothing: true       # Enable confidence score smoothing
+    class_voting: true               # Enable temporal voting for class predictions
+
+# Object detection classifiers
+classifiers:
+  # YOLO-World for general object detection
+  yolo_world:
+    enabled: true
+    confidence_threshold: 0.4        # Lower threshold for better tracking
+    classes:
+      - "person"
+      - "car"
+      - "bicycle"
+      - "motorcycle"
+      - "tree"
+      - "wheelchair"
+      - "walker"
+      - "stroller"
+      - "dog"
+      - "cat"
+
+  # Face emotion detection
+  face_emotion:
+    enabled: true
+    face_confidence: 0.3             # Lower for better face detection
+    emotion_confidence: 0.1          # Accept low emotion confidence
+    face_padding: 0.3
+    min_face_size: 30
+    confidence_threshold: 0.1
+    model_path: null
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

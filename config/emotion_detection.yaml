@@ -1,0 +1,45 @@
+# Configuration for testing emotion detection
+# Enables both object detection and face emotion detection
+
+video_processor:
+  font_scale: 0.6
+  font_thickness: 2
+  bbox_thickness: 2
+  text_color: [255, 255, 255]  # White text
+  bbox_color: [0, 255, 0]      # Green boxes (overridden per class)
+  
+  # Detection enhancement settings
+  face_person_association: true   # Associate face emotions with person detections
+  non_max_suppression: true       # Remove overlapping detections
+  nms_threshold: 0.5              # IoU threshold for NMS
+
+classifiers:
+  # YOLO-World for general object detection (reduced classes for cleaner output)
+  yolo_world:
+    enabled: true
+    model_size: "s"
+    confidence_threshold: 0.4  # Higher threshold for cleaner results
+    device: "auto"
+    input_size: 640
+    classes:
+      # Focus on people and key objects
+      - "person"
+      - "car"
+      - "tree"
+      - "wheelchair"
+      - "walker"
+      - "stroller"
+
+  # Face emotion detection
+  face_emotion:
+    enabled: true
+    face_confidence: 0.3        # Lower confidence to catch more faces
+    emotion_confidence: 0.1     # Very low to include all emotion predictions
+    face_padding: 0.3           # More padding for better emotion analysis
+    min_face_size: 30           # Reasonable minimum face size
+    confidence_threshold: 0.1   # Very low overall threshold for testing
+    model_path: null            # Use built-in model
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

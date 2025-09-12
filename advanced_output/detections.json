@@ -1,0 +1,41 @@
+{
+  "session_info": {
+    "start_time": 1757483778.884782,
+    "total_frames": 205,
+    "output_directory": "advanced_output"
+  },
+  "frames": [
+    {
+      "frame_number": 0,
+      "timestamp": 1.513495922088623,
+      "detections": [],
+      "frame_path": null
+    },
+    {
+      "frame_number": 1,
+      "timestamp": 1.629065990447998,
+      "detections": [],
+      "frame_path": null
+    },
+    {
+      "frame_number": 2,
+      "timestamp": 1.7407948970794678,
+      "detections": [],
+      "frame_path": null
+    },
+    {
+      "frame_number": 3,
+      "timestamp": 1.8418257236480713,
+      "detections": [
+        {
+          "bbox": [
+            834,
+            551,
+            863,
+            630
+          ],
+          "class_name": "person",
+          "confidence": 0.5739182233810425,
+          "track_id": 1,
+          "metadata": {
+            "class_id": 

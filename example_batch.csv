@@ -1,0 +1,4 @@
+input_path,output_path,config_path,job_id
+videos/video1.mp4,batch_output/video1_processed.mp4,config/tracking_config.yaml,video1_tracking
+videos/video2.mp4,batch_output/video2_processed.mp4,config/emotion_detection.yaml,video2_emotion
+videos/video3.mp4,batch_output/video3_processed.mp4,config/simple_tracking.yaml,video3_simple

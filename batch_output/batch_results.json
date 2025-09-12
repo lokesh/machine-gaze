@@ -1,0 +1,38 @@
+{
+  "jobs": [
+    {
+      "input_path": "videos/kiran.MOV",
+      "output_path": "batch_output/kiran_processed.MOV",
+      "config_path": "config/simple_tracking.yaml",
+      "job_id": "batch_kiran",
+      "status": "completed",
+      "start_time": 1757484129.574896,
+      "end_time": 1757484265.1830442,
+      "error_message": null,
+      "total_frames": null,
+      "processed_frames": null
+    },
+    {
+      "input_path": "videos/sarah.MOV",
+      "output_path": "batch_output/sarah_processed.MOV",
+      "config_path": "config/simple_tracking.yaml",
+      "job_id": "batch_sarah",
+      "status": "completed",
+      "start_time": 1757484265.183566,
+      "end_time": 1757484287.057207,
+      "error_message": null,
+      "total_frames": null,
+      "processed_frames": null
+    }
+  ],
+  "summary": {
+    "status": "completed",
+    "total_duration": 0,
+    "jobs_total": 2,
+    "jobs_completed": 2,
+    "jobs_failed": 0,
+    "success_rate": 1.0,
+    "average_job_duration": 78.74089455604553,
+    "failed_jobs": []
+  }
+}

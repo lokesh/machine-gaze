@@ -1,0 +1,44 @@
+# MACHINE GAZE - Simple Tracking Configuration
+# Minimal tracking setup for testing
+
+video_processor:
+  overlay_only: true
+  background_color: [0, 0, 0]
+  
+  # Basic tracking without trajectories
+  tracking:
+    enabled: true
+    show_track_ids: true
+    show_trajectories: false        # Disable trajectories for cleaner output
+    
+    # Conservative tracking parameters
+    high_thresh: 0.5
+    low_thresh: 0.2
+    new_track_thresh: 0.6
+    track_buffer: 20
+    match_thresh: 0.7
+    
+    # Basic smoothing
+    temporal_window: 3
+    bbox_smoothing: true
+    confidence_smoothing: true
+    class_voting: true
+
+classifiers:
+  yolo_world:
+    enabled: true
+    confidence_threshold: 0.5
+    classes:
+      - "person"
+      - "car"
+      - "bicycle"
+
+  face_emotion:
+    enabled: true
+    face_confidence: 0.3
+    emotion_confidence: 0.1
+    min_face_size: 30
+    confidence_threshold: 0.1
+
+logging:
+  level: "INFO"

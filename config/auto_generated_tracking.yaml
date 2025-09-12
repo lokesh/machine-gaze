@@ -1,0 +1,41 @@
+classifiers:
+  face_emotion:
+    confidence_threshold: 0.3
+    emotion_confidence: 0.3
+    enabled: false
+    face_confidence: 0.5
+    face_padding: 0.2
+    min_face_size: 30
+    model_path: null
+  yolo_world:
+    classes:
+    - person
+    - car
+    - bicycle
+    - motorcycle
+    confidence_threshold: 0.5
+    device: auto
+    enabled: true
+    model_size: s
+logging:
+  level: INFO
+video_processor:
+  background_color:
+  - 0
+  - 0
+  - 0
+  face_person_association: true
+  non_max_suppression: true
+  overlay_only: true
+  tracking:
+    bbox_smoothing: true
+    class_voting: true
+    confidence_smoothing: true
+    enabled: true
+    high_thresh: 0.6
+    low_thresh: 0.1
+    new_track_thresh: 0.7
+    show_track_ids: true
+    show_trajectories: true
+    temporal_window: 5
+    trajectory_length: 15
