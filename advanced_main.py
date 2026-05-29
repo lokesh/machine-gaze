@@ -52,7 +52,7 @@ class AdvancedVideoProcessor:
         self.registry = get_registry()
         self.registry.setup_from_config(self.config)
         
-        self.processor = VideoProcessor(self.registry, self.config.get('video_processor', {}))
+        self.processor = VideoProcessor(self.registry, ConfigLoader.video_processor_config(self.config))
         
         # Initialize export manager
         self.export_manager = ExportManager(str(self.output_dir))

@@ -105,8 +105,8 @@ Examples:
             return 1
         
         # Create video processor
-        video_config = config.get('video_processor', {})
-        
+        video_config = ConfigLoader.video_processor_config(config)
+
         # Apply overlay-only setting from command line
         if args.overlay_only:
             video_config['overlay_only'] = True

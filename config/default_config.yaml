@@ -3,8 +3,8 @@
 
 # Global settings
 output:
-  fps: null  # Use input video FPS
-  codec: "mp4v"
+  fps: null     # Use input video FPS
+  codec: "avc1" # H.264 (smaller/higher quality); auto-falls back to mp4v if unavailable
   quality: 0.9
 
 # Video processing settings

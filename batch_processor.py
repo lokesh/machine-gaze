@@ -201,7 +201,7 @@ class BatchProcessor:
             registry = get_registry()
             registry.setup_from_config(config)
             
-            processor = VideoProcessor(registry, config.get('video_processor', {}))
+            processor = VideoProcessor(registry, ConfigLoader.video_processor_config(config))
             
             # Process video
             success = processor.process_video(job.input_path, job.output_path)

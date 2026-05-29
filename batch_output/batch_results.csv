@@ -1,3 +1,0 @@
-input_path,output_path,config_path,job_id,status,start_time,end_time,error_message,total_frames,processed_frames
-videos/kiran.MOV,batch_output/kiran_processed.MOV,config/simple_tracking.yaml,batch_kiran,completed,1757484129.574896,1757484265.1830442,,,
-videos/sarah.MOV,batch_output/sarah_processed.MOV,config/simple_tracking.yaml,batch_sarah,completed,1757484265.183566,1757484287.057207,,,

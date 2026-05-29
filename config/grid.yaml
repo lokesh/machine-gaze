@@ -1,0 +1,87 @@
+# MACHINE GAZE - Grid quantization
+#
+# Imposes a fixed lattice on the frame and snaps every detection onto it -
+# the machine's compulsion to categorize and place. Tracking is enabled so
+# subjects "click" coherently between cells rather than jittering per-frame.
+#
+#   python main.py input.mp4 output/grid.mp4 --config config/grid.yaml
+#
+# Try the different `mode` values below to change the whole feel of the piece.
+
+# Grid rendering (the artistic transform). When enabled, this takes over the
+# final draw step from the normal bounding-box renderer.
+grid:
+  enabled: true
+  rows: 24
+  cols: 36
+
+  # Pick one:
+  #   snap_box     - snap each box's edges to grid lines, keep its size
+  #   snap_cell    - collapse each subject to the single cell at its center
+  #   pixel        - resample the real image content into the snapped cell block
+  #   typographic  - replace each subject with its class label, sized to the cell
+  #   census       - heatmap of how many detections occupy each cell
+  #   ghost        - snapped boxes that never fully clear; trails accumulate
+  mode: "pixel"
+
+  # Draw the lattice itself.
+  show_gridlines: true
+  gridline_color: [40, 40, 40]   # BGR
+  gridline_thickness: 1
+
+  # Canvas color for pixel/typographic/census/ghost modes (BGR).
+  background_color: [0, 0, 0]
+
+  min_cells: 1          # smallest span (in cells) a snapped box may collapse to
+  ghost_decay: 0.92     # ghost mode only: per-frame fade of the trail (0..1)
+
+output:
+  fps: null
+  codec: "avc1"
+  quality: 0.9
+
+video_processor:
+  # snap_box/snap_cell respect this; pixel/typographic/census/ghost build their
+  # own canvas. Leave false to snap boxes over the source video.
+  overlay_only: false
+  background_color: [0, 0, 0]
+
+  face_person_association: true
+  non_max_suppression: true
+  nms_threshold: 0.5
+
+  # Tracking smooths the snapped motion so subjects move coherently cell to cell.
+  tracking:
+    enabled: true
+    high_thresh: 0.6
+    low_thresh: 0.1
+    new_track_thresh: 0.7
+    track_buffer: 30
+    match_thresh: 0.8
+    show_track_ids: false        # labels usually distract from the grid aesthetic
+    show_trajectories: false
+    trajectory_length: 15
+    temporal_window: 5
+    bbox_smoothing: true
+    confidence_smoothing: true
+    class_voting: true
+
+classifiers:
+  yolo_world:
+    enabled: true
+    confidence_threshold: 0.4
+    classes:
+      - "person"
+      - "car"
+      - "bicycle"
+      - "motorcycle"
+      - "tree"
+      - "dog"
+      - "cat"
+
+  face_emotion:
+    enabled: false
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

@@ -12,6 +12,7 @@ import numpy as np
 from pathlib import Path
 from typing import Optional, List, Callable, Dict, Any
 from .classifier_registry import ClassifierRegistry, Detection
+from .grid_renderer import GridRenderer
 from ..utils.detection_utils import associate_faces_with_people, filter_overlapping_detections
 from ..tracking import ByteTracker, TrackSmoother
 from ..tracking.track_smoother import SmoothedTrackState
@@ -41,9 +42,12 @@ class VideoProcessor:
         self.registry = registry
         self.config = config or {}
         
-        # Video processing settings
+        # Video processing settings. These can be supplied directly under
+        # `video_processor:` or injected from the top-level `output:` block by
+        # the entrypoints. avc1 (H.264) gives smaller, higher-quality files
+        # than mp4v; process_video falls back to mp4v if the writer won't open.
         self.output_fps = self.config.get('output_fps', None)  # None = use input fps
-        self.output_codec = self.config.get('output_codec', 'mp4v')
+        self.output_codec = self.config.get('output_codec', 'avc1')
         self.output_quality = self.config.get('output_quality', 0.9)
         
         # Rendering settings
@@ -92,7 +96,11 @@ class VideoProcessor:
         else:
             self.tracker = None
             self.track_smoother = None
-        
+
+        # Grid rendering (artistic quantization onto a fixed lattice).
+        # When enabled, the grid renderer takes over the final draw step.
+        self.grid = GridRenderer(self.config.get('grid', {}), self)
+
         # Progress callback
         self.progress_callback: Optional[Callable[[int, int], None]] = None
     
@@ -140,12 +148,24 @@ class VideoProcessor:
             
             # Set up output video writer
             output_fps = self.output_fps if self.output_fps else fps
-            fourcc = cv2.VideoWriter_fourcc(*self.output_codec)
-            
+
             # Ensure output directory exists
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            
-            out = cv2.VideoWriter(str(output_path), fourcc, output_fps, (width, height))
+
+            # Try the configured codec; fall back to mp4v if the platform's
+            # OpenCV build can't open a writer with it (H.264 support varies).
+            out = cv2.VideoWriter(
+                str(output_path), cv2.VideoWriter_fourcc(*self.output_codec),
+                output_fps, (width, height)
+            )
+            if not out.isOpened() and self.output_codec != 'mp4v':
+                logger.warning(
+                    f"Codec '{self.output_codec}' unavailable; falling back to 'mp4v'"
+                )
+                out = cv2.VideoWriter(
+                    str(output_path), cv2.VideoWriter_fourcc(*'mp4v'),
+                    output_fps, (width, height)
+                )
             if not out.isOpened():
                 logger.error(f"Could not create output video: {output_path}")
                 return False
@@ -176,9 +196,9 @@ class VideoProcessor:
                         # Convert track states back to detections
                         final_detections = self._tracks_to_detections(track_states)
                 
-                # Render detections onto frame
-                annotated_frame = self.render_detections(frame, final_detections)
-                
+                # Render detections onto frame (grid renderer takes over if enabled)
+                annotated_frame = self._render(frame, final_detections)
+
                 # Write annotated frame
                 out.write(annotated_frame)
                 
@@ -360,8 +380,14 @@ class VideoProcessor:
                 # Convert track states back to detections
                 final_detections = self._tracks_to_detections(track_states)
         
-        annotated_frame = self.render_detections(frame, final_detections)
+        annotated_frame = self._render(frame, final_detections)
         return annotated_frame, final_detections
+
+    def _render(self, frame: np.ndarray, detections: List[Detection]) -> np.ndarray:
+        """Final draw step: grid renderer when enabled, otherwise plain boxes."""
+        if self.grid is not None and self.grid.enabled:
+            return self.grid.render(frame, detections)
+        return self.render_detections(frame, detections)
     
     def _tracks_to_detections(self, track_states) -> List[Detection]:
         """

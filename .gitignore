@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# Source footage — large; kept local, not pushed (GitHub 100MB limit). A small
+# sample (videos/sarah.MOV) remains tracked so the repo runs out of the box.
+videos/
+
+# Run artifacts (annotated videos, exports, debug images)
+output/
+advanced_output/
+batch_output/
+test_advanced_output/
+final_test_output/
+debug_*.jpg
+debug_*.png
+*.mov.tmp
